@@ -27,7 +27,10 @@ shiny::shinyUI(shiny::fluidPage(
       shiny::selectInput(
         inputId = "station",
         label = "Weather station",
-        choices = newa_stations$station_state
+        choices = newa_stations$code %>%
+          purrr::map_chr(~.x) %>%
+          magrittr::set_names(newa_stations$station_state)
+        # choices = newa_stations$station_state
       ),
 
       shiny::dateInput(
@@ -40,7 +43,8 @@ shiny::shinyUI(shiny::fluidPage(
 
     # Show a plot of the generated distribution
     shiny::mainPanel(
-      shiny::tableOutput("dailyData")
+      shiny::tableOutput("dailyData") %>%
+        shinycssloaders::withSpinner()
     )
   )
 ))

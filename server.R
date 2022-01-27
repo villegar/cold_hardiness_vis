@@ -19,17 +19,20 @@ newa_stations <- scrappy::newa_stations %>%
 # Define server logic required to draw a histogram
 shiny::shinyServer(function(input, output) {
     output$dailyData <- shiny::renderTable({
-      station <- newa_stations %>%
-        dplyr::filter(
-          station_state %>%
-            stringr::str_detect(input$station %>%
-                                  stringr::str_remove_all("\\[[A-Z]*\\]"))) %>%
-        .$code
-      aux <- scrappy::newa_nrcc3(year = lubridate::year(input$dates),
-                                 month = lubridate::month(input$dates),
-                                 day = lubridate::day(input$dates),
-                                 hour = 0,
-                                 station = station)
-      aux$daily_forecast
+      Sys.sleep(1)
+      # browser()
+      tryCatch({
+        aux <- scrappy::newa_nrcc3(year = lubridate::year(input$dates),
+                                   month = lubridate::month(input$dates),
+                                   day = lubridate::day(input$dates),
+                                   hour = 0,
+                                   station = input$station)
+        dplyr::bind_rows(
+          aux$daily,
+          aux$daily_forecast
+        ) %>%
+          dplyr::distinct()
+      }, error = function(e) {
+      })
     })
 })
